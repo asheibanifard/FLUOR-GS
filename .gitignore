@@ -1,0 +1,113 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints/
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific - Model checkpoints
+*.pt
+*.pth
+*.ckpt
+
+# Project specific - Compressed bitstreams
+*.npz.gz
+*.npz
+
+# Project specific - Large data files
+*.tif
+*.tiff
+*.nii
+*.nii.gz
+
+# Project specific - Output/logs
+logs/
+outputs/
+results/
+*.log
+
+# Depth-Anything-V2 model weights (if large)
+Depth-Anything-V2/checkpoints/
+Depth-Anything-V2/*.pth
+
+# Large pre-rendered viewer HTML files
+neurogs_v7/rendering/viewer*.html
+
+# SWC morphology files
+*.swc
+
+# SSH keys (should never be committed)
+neurogs_v7/yes
+neurogs_v7/yes.pub

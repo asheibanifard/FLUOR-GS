@@ -1,0 +1,127 @@
+# NeuroSGM — MIP Splatting Configuration
+# ========================================
+# All tuneable hyperparameters for the MIPSplattingTrainer pipeline.
+# Edit this file to change training behaviour without touching source code.
+
+# ------------------------------------------------------------------
+# Dataset / volume
+# ------------------------------------------------------------------
+dataset:
+  vol_path: "dataset/10-2900-control-cell-05_cropped_corrected.tif"
+  swc_path: "dataset/10-2900-control-cell-05_cropped_corrected.swc"  # SWC for Gaussian init (null = random)
+  ckpt_path: null  # set to a .pt path to resume from pretrained; null = train from scratch
+
+# ------------------------------------------------------------------
+# Gaussian initialisation (used when ckpt_path is null)
+# ------------------------------------------------------------------
+init:
+  num_gaussians: 10000
+  init_scale: 0.09           # ~2 / K^{1/3}  for K=10000
+  init_amplitude: 0.05       # moderate so overlapping Gaussians sum to ~1.0
+  bounds: [[-1,1],[-1,1],[-1,1]]
+
+# ------------------------------------------------------------------
+# Camera
+# ------------------------------------------------------------------
+camera:
+  fov_x_deg: 50.0
+  near: 0.01
+  far: 10.0
+
+# ------------------------------------------------------------------
+# GT MIP projection generation
+# ------------------------------------------------------------------
+poses:
+  n_azimuth: 10
+  n_elevation: 10
+  elevation_min: -60.0
+  elevation_max:  60.0
+  radius: 3.5
+  include_axis_aligned: true
+
+ray_marching:
+  n_samples: 200
+  near: 0.5
+  far: 6.0
+
+# ------------------------------------------------------------------
+# Trainer — optimisation
+# ------------------------------------------------------------------
+training:
+  n_epochs: 2000
+  lr: 3.0e-3              # base learning rate  (was 1e-3)
+  lr_final: 1.0e-5        # cosine-annealed final LR
+  beta_mip: 50.0          # soft-MIP final sharpness
+  beta_mip_init: 10.0     # start softer for smoother gradients
+  beta_warmup_epochs: 500  # linearly warm beta over this many epochs
+  views_per_step: 4       # mini-batch size (views per optimizer step)
+  log_every: 10
+  save_every: 100
+  chunk_size: 4096        # pixels per splatting chunk (reduce if OOM)
+
+# ------------------------------------------------------------------
+# Trainer — loss / regularisation
+# ------------------------------------------------------------------
+loss:
+  fg_weight:        5.0    # foreground emphasis in weighted MSE (1.0 = standard MSE)
+  lambda_ssim:      0.2    # weight for SSIM loss term (1 - SSIM)
+  lambda_edge:      0.1    # gradient/edge loss for fine process preservation
+  lambda_sparse:    0.0    # intensity sparsity regularization (0.001 recommended)
+  lambda_scale:     0.001  # lower-bound scale penalty weight
+  scale_min:        0.001  # penalise scales below this
+  lambda_scale_max: 0.01   # upper-bound scale penalty weight
+  scale_max:        0.01   # penalise scales above this
+
+# ------------------------------------------------------------------
+# Trainer — log_scales hard clamp  (log space)
+#   e^{-9.0} ≈ 0.00012  (minimum scale)
+#   e^{-2.3} ≈ 0.10     (maximum scale — must be >= scale_max above)
+# ------------------------------------------------------------------
+scale_clamp:
+  log_min: -9.0
+  log_max: -2.3
+
+log_intensity_clamp:
+  min: -5.0
+  max:  5.0
+
+# ------------------------------------------------------------------
+# Trainer — pruning
+# ------------------------------------------------------------------
+pruning:
+  prune_every: 25          # prune every N epochs (0 = disabled)
+  intens_thresh: 0.01      # remove Gaussians with intensity below this
+  min_gaussians: 2000      # never prune below this count
+
+# ------------------------------------------------------------------
+# Trainer — adaptive density control (split / clone)
+# ------------------------------------------------------------------
+densification:
+  densify_every: 100
+  start_epoch: 100        # (steps for CUDA trainer)
+  stop_epoch: 1500
+  grad_thresh: 0.000002      # was 0.0002 — lower by ~10x for CUDA trainer
+  scale_thresh: 0.005
+  max_gaussians: 500000
+  split_factor: 1.6
+# ------------------------------------------------------------------
+# CUDA trainer (CUDASplattingTrainer) — used if CUDA kernel available
+# ------------------------------------------------------------------
+cuda_trainer:
+  n_steps: 10000
+  log_every: 100
+  save_every: 2000
+  pixels_per_step: 8192
+  sampling_mode: "tile"
+  max_visible_gaussians: 4096
+  views_per_step_env: "HISNEGS_VIEWS_PER_STEP"  # env var override
+  views_per_step_default: 60
+
+# ------------------------------------------------------------------
+# Checkpoint output paths
+# ------------------------------------------------------------------
+output:
+  mip_ckpt_dir: "./checkpoints/mip_ckpt"
+  epoch_template: "splat_ep{epoch}.pt"
+  step_template: "splat_step{step}.pt"
+  figure_dir: "figure"
