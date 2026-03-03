@@ -1,0 +1,461 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{microtype}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!60!black,
+    urlcolor=blue!60!black,
+}
+
+% Theorem environments
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\theoremstyle{plain}
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[section]
+
+% Operators
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Stwo}{S^2}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\newcommand{\dd}{\,\mathrm{d}}
+
+\title{%
+  \textbf{Mathematical Proof: Level-0 Spherical Harmonics}\\[4pt]
+  \large as the Exact and Complete Representation\\
+  for Isotropic Fluorescence Emission in our model
+}
+\author{Armin Sheibanifard\\
+\small National Centre for Computer Animation, Bournemouth University}
+\date{\today}
+
+% ===================================================================
+\begin{document}
+\maketitle
+\tableofcontents
+\bigskip
+
+% -------------------------------------------------------------------
+\section{Introduction}
+
+This document provides a rigorous mathematical proof of the following
+central hypothesis:
+
+\begin{quote}
+\itshape
+For isotropic fluorescence emission as modelled in NeuroSGM, the
+spherical harmonic expansion truncated at degree $L=0$ is not merely
+a simplification but the \emph{exact} and \emph{physically necessary}
+representation.  Consequently, (i)~the $L=0$ basis function
+$Y_0^0$ is a positive constant with zero oscillatory content, and
+(ii)~no negative oscillation exists at this level, rendering concerns
+about the negative portions of higher-degree sinusoidal harmonics
+entirely vacuous.
+\end{quote}
+
+% -------------------------------------------------------------------
+\section{Definitions}
+
+\begin{definition}[Unit sphere]
+\label{def:sphere}
+The unit sphere in $\R^3$ is
+\[
+  \Stwo \;=\; \bigl\{\,\mathbf{d}\in\R^3 : \norm{\mathbf{d}}=1\,\bigr\}.
+\]
+Every direction $\mathbf{d}\in\Stwo$ is parameterised by polar angle
+$\theta\in[0,\pi]$ and azimuthal angle $\phi\in[0,2\pi)$ via
+\[
+  \mathbf{d} = (\sin\theta\cos\phi,\;\sin\theta\sin\phi,\;\cos\theta)^\top.
+\]
+\end{definition}
+
+\begin{definition}[Real spherical harmonics]
+\label{def:sh}
+For degree $l\in\mathbb{N}_0$ and order $m\in\{-l,\ldots,l\}$, the
+\emph{real spherical harmonic} $Y_l^m : \Stwo\to\R$ is
+\[
+  Y_l^m(\theta,\phi)
+  \;=\;
+  N_l^m\;\cdot\;P_l^{|m|}(\cos\theta)\;\cdot\;
+  \begin{cases}
+    \sqrt{2}\,\cos(m\phi)   & m > 0,\\[2pt]
+    1                        & m = 0,\\[2pt]
+    \sqrt{2}\,\sin(|m|\phi) & m < 0,
+  \end{cases}
+\]
+where
+\[
+  N_l^m \;=\; \sqrt{\frac{2l+1}{4\pi}\,\frac{(l-|m|)!}{(l+|m|)!}}
+\]
+is the normalisation constant and $P_l^{|m|}$ denotes the associated
+Legendre polynomial of degree $l$ and order $|m|$.
+\end{definition}
+
+\begin{definition}[Orthonormality of SH]
+\label{def:ortho}
+The real spherical harmonics form an orthonormal basis for
+$L^2(\Stwo)$:
+\[
+  \int_{\Stwo} Y_l^m(\mathbf{d})\;Y_{l'}^{m'}(\mathbf{d})\dd\mathbf{d}
+  \;=\;
+  \delta_{ll'}\,\delta_{mm'}.
+\]
+\end{definition}
+
+\begin{definition}[SH series expansion]
+\label{def:shexp}
+Any square-integrable function $f:\Stwo\to\R$ admits the unique
+decomposition
+\[
+  f(\mathbf{d})
+  \;=\;
+  \sum_{l=0}^{\infty}\sum_{m=-l}^{l}
+    c_l^m\;Y_l^m(\mathbf{d}),
+  \qquad
+  c_l^m \;=\; \int_{\Stwo} f(\mathbf{d})\;Y_l^m(\mathbf{d})\dd\mathbf{d},
+\]
+where $c_l^m\in\R$ are the \emph{spectral coefficients}.
+\end{definition}
+
+\begin{definition}[Fluorescence intensity model]
+\label{def:intensity}
+Each 3D Gaussian primitive $i$ is assigned an \emph{emission intensity}
+$a_i : \Stwo \to \R_{>0}$, mapping the unit viewing direction
+$\mathbf{d}_i\in\Stwo$ to a non-negative scalar signal amplitude.
+\end{definition}
+
+\begin{definition}[MIP rendering operator]
+\label{def:mip}
+Let $K$ be the number of Gaussian primitives.  The rendered intensity
+at image pixel $(u,v)$ under the \emph{Maximum Intensity Projection}
+(MIP) operator is
+\[
+  I(u,v)
+  \;=\;
+  \max_{i=1}^{K}
+    \Bigl[\,a_i(\mathbf{d}_i)\;\cdot\;G_{2D,i}(u,v)\,\Bigr],
+\]
+where
+\begin{align*}
+  G_{2D,i}(u,v)
+  &\;=\;
+  \exp\!\Bigl(
+    -\tfrac{1}{2}\,
+    (\mathbf{p}-\boldsymbol{\mu}_{2D,i})^\top
+    \Sigma_{2D,i}^{-1}
+    (\mathbf{p}-\boldsymbol{\mu}_{2D,i})
+  \Bigr)
+  \;\in\;(0,1],\\[4pt]
+  \mathbf{d}_i
+  &\;=\;
+  \frac{\boldsymbol{\mu}_i^{\mathrm{cam}}}
+       {\norm{\boldsymbol{\mu}_i^{\mathrm{cam}}}},
+\end{align*}
+$\boldsymbol{\mu}_{2D,i}$ is the projected 2D centre of Gaussian $i$,
+$\Sigma_{2D,i}$ is its projected 2D covariance, and
+$\boldsymbol{\mu}_i^{\mathrm{cam}}$ is the Gaussian centre in camera
+coordinates.
+\end{definition}
+
+% -------------------------------------------------------------------
+\section{The \texorpdfstring{$L=0$}{L=0} Spherical Harmonic}
+
+\begin{proposition}
+\label{prop:Y00constant}
+The $L=0$ spherical harmonic $Y_0^0$ is a strictly positive constant
+on $\Stwo$, independent of direction.
+\end{proposition}
+
+\begin{proof}
+Setting $l=0$ and $m=0$ in Definition~\ref{def:sh}:
+\[
+  N_0^0
+  \;=\;
+  \sqrt{\frac{2\cdot 0+1}{4\pi}\,\frac{(0-0)!}{(0+0)!}}
+  \;=\;
+  \sqrt{\frac{1}{4\pi}}.
+\]
+The associated Legendre polynomial at $l=0$, $m=0$ evaluates to
+\[
+  P_0^0(\cos\theta) \;=\; 1 \qquad \forall\,\theta\in[0,\pi],
+\]
+and the azimuthal factor for $m=0$ is $1$ by Definition~\ref{def:sh}.
+Therefore
+\[
+  \boxed{Y_0^0(\theta,\phi)
+  \;=\;
+  \sqrt{\frac{1}{4\pi}}\;\cdot\;1\;\cdot\;1
+  \;=\;
+  \frac{1}{2\sqrt{\pi}}
+  \;\approx\;
+  0.2821}
+\]
+for all $(\theta,\phi)$, i.e.\ for all $\mathbf{d}\in\Stwo$.  The
+value is strictly positive and depends on neither $\theta$ nor $\phi$.
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Direction-Independence at \texorpdfstring{$L=0$}{L=0}}
+
+\begin{proposition}
+\label{prop:dirindep}
+Truncating the SH expansion at degree $L=0$ yields a
+direction-independent function.
+\end{proposition}
+
+\begin{proof}
+From Definition~\ref{def:shexp}, the $L=0$ truncation retains only
+$l=0$, $m=0$:
+\[
+  f(\mathbf{d})
+  \;\Big|_{L=0}
+  \;=\;
+  \sum_{m=-0}^{0} c_0^m\,Y_0^m(\mathbf{d})
+  \;=\;
+  c_0^0\,Y_0^0.
+\]
+By Proposition~\ref{prop:Y00constant}, $Y_0^0 = \frac{1}{2\sqrt{\pi}}$
+is constant.  Hence
+\[
+  f(\mathbf{d})\Big|_{L=0}
+  \;=\;
+  \frac{c_0^0}{2\sqrt{\pi}}
+  \;=\;
+  \mathrm{const}
+  \qquad
+  \forall\,\mathbf{d}\in\Stwo.
+\]
+The function value is identical for every direction on the sphere.
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Non-Negativity of the Emission Amplitude}
+
+\begin{proposition}
+\label{prop:nonneg}
+Let $c_i\in\R$ be a learned scalar parameter for Gaussian $i$.  The
+sigmoid-activated $L=0$ intensity
+\[
+  a_i(\mathbf{d})
+  \;=\;
+  \sigma\!\left(\frac{c_i}{2\sqrt{\pi}}\right)
+  \;=\;
+  \sigma\bigl(c_i\,Y_0^0\bigr)
+\]
+satisfies $a_i(\mathbf{d})\in(0,1)$ for all $\mathbf{d}\in\Stwo$ and
+all $c_i\in\R$, where $\sigma(x)=\bigl(1+e^{-x}\bigr)^{-1}$.
+\end{proposition}
+
+\begin{proof}
+Since $Y_0^0$ is constant (Proposition~\ref{prop:Y00constant}), the
+argument of $\sigma$ is the fixed real scalar $c_i/(2\sqrt{\pi})$,
+independent of $\mathbf{d}$.  The sigmoid satisfies
+\[
+  \sigma : \R \;\longrightarrow\; (0,1) \quad \text{strictly},
+\]
+because $e^{-x}>0$ for all $x\in\R$, giving $1+e^{-x}>1$ and thus
+$\sigma(x)<1$, while $e^{-x}<\infty$ gives $\sigma(x)>0$.  Therefore
+\[
+  a_i(\mathbf{d})
+  \;=\;
+  \sigma\!\left(\frac{c_i}{2\sqrt{\pi}}\right)
+  \;\in\;(0,1)
+  \qquad
+  \forall\,\mathbf{d}\in\Stwo,\;\forall\,c_i\in\R.
+  \qedhere
+\]
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Absence of Oscillation at \texorpdfstring{$L=0$}{L=0}}
+
+\begin{proposition}
+\label{prop:nooscill}
+$Y_0^0$ contains no oscillatory component.  Specifically, it has zero
+spatial frequency in both $\theta$ and $\phi$.
+\end{proposition}
+
+\begin{proof}
+From Proposition~\ref{prop:Y00constant}, $Y_0^0 = \tfrac{1}{2\sqrt{\pi}}$.
+Taking partial derivatives:
+\[
+  \frac{\partial\,Y_0^0}{\partial\theta} \;=\; 0,
+  \qquad
+  \frac{\partial\,Y_0^0}{\partial\phi}   \;=\; 0.
+\]
+The function is flat on $\Stwo$.  In particular:
+\begin{itemize}[leftmargin=2em]
+  \item There is \emph{no} $\phi$-dependent factor $\cos(m\phi)$ or
+        $\sin(|m|\phi)$, because the $m=0$ case in
+        Definition~\ref{def:sh} contributes a factor of $1$.
+  \item There is \emph{no} Legendre polynomial variation in $\theta$,
+        because $P_0^0(\cos\theta)=1$ for all $\theta$.
+\end{itemize}
+Hence $Y_0^0$ oscillates with zero frequency in both angular
+coordinates.  It attains the single value $\tfrac{1}{2\sqrt{\pi}}>0$
+everywhere, so it has \emph{no negative values}.
+\end{proof}
+
+\begin{corollary}
+\label{cor:noneg}
+Concerns about the negative portions of higher-degree sinusoidal
+harmonics are vacuous at $L=0$.  There exist no negative values to
+suppress or discard.
+\end{corollary}
+
+\begin{proof}
+Immediate from Proposition~\ref{prop:nooscill}: $Y_0^0>0$ everywhere.
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Physical Justification: Isotropic Emission}
+
+\begin{proposition}
+\label{prop:physical}
+For isotropic fluorescence emission, $L=0$ SH is the uniquely correct
+and complete truncation level.
+\end{proposition}
+
+\begin{proof}
+A fluorophore emits photons \emph{isotropically}: its emission
+intensity is identical in every direction,
+\[
+  a_i(\mathbf{d}) \;=\; a_i \;=\; \mathrm{const}
+  \qquad
+  \forall\,\mathbf{d}\in\Stwo.
+\]
+By Definition~\ref{def:shexp}, the spectral coefficients of $a_i$ are
+\[
+  c_l^m
+  \;=\;
+  \int_{\Stwo} a_i\;Y_l^m(\mathbf{d})\dd\mathbf{d}
+  \;=\;
+  a_i \int_{\Stwo} Y_l^m(\mathbf{d})\dd\mathbf{d}.
+\]
+By orthonormality (Definition~\ref{def:ortho}), for $l\geq 1$:
+\[
+  \int_{\Stwo} Y_l^m(\mathbf{d})\dd\mathbf{d}
+  \;=\;
+  \int_{\Stwo} Y_l^m(\mathbf{d})\;Y_0^0\cdot\frac{1}{Y_0^0}\dd\mathbf{d}
+  \;=\;
+  \frac{1}{Y_0^0}
+  \underbrace{\int_{\Stwo} Y_l^m(\mathbf{d})\;Y_0^0\dd\mathbf{d}}_{=\,\delta_{l0}\delta_{m0}\,=\,0}
+  \;=\; 0.
+\]
+Therefore
+\[
+  c_l^m \;=\; 0
+  \qquad
+  \forall\, l\geq 1,\; m\in\{-l,\ldots,l\}.
+\]
+The \emph{exact} SH representation of $a_i$ is
+\[
+  a_i(\mathbf{d})
+  \;=\;
+  c_0^0\,Y_0^0
+  \;=\;
+  \frac{c_0^0}{2\sqrt{\pi}},
+\]
+containing \emph{only} the $l=0$ term.  Including any $l\geq 1$ terms
+would model directional variation that is physically absent, introducing
+unnecessary parameters without improving expressive power for this
+signal class.
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Equivalence to the Current Scalar Model}
+
+\begin{proposition}
+\label{prop:equiv}
+The NeuroSGM scalar intensity model
+$a_i = \sigma(\mathrm{log\_intensity}_i)$
+is algebraically equivalent to the $L=0$ SH model.
+\end{proposition}
+
+\begin{proof}
+In the $L=0$ SH model (Proposition~\ref{prop:dirindep}):
+\[
+  a_i
+  \;=\;
+  \sigma\!\left(c_0^0\cdot Y_0^0\right)
+  \;=\;
+  \sigma\!\left(\frac{c_0^0}{2\sqrt{\pi}}\right).
+\]
+Define $\tilde{c}_i \;=\; c_0^0/(2\sqrt{\pi}) \;\in\;\R$.  Then
+\[
+  a_i \;=\; \sigma(\tilde{c}_i).
+\]
+Setting $\tilde{c}_i = \mathrm{log\_intensity}_i$ recovers exactly
+the current model.  The two parameterisations differ only by the
+absorbing constant $1/(2\sqrt{\pi})$ into the learned scalar, which
+does not affect expressiveness.
+\end{proof}
+
+% -------------------------------------------------------------------
+\section{Summary}
+
+The following chain of implications constitutes the complete proof:
+
+\[
+\underbrace{a_i(\mathbf{d})=\mathrm{const}}_{\substack{\text{isotropic}\\\text{emission}}}
+\;\Longrightarrow\;
+\underbrace{c_l^m=0\;\;\forall\,l\geq 1}_{\substack{\text{Proposition}\\\ref{prop:physical}}}
+\;\Longrightarrow\;
+\underbrace{Y_0^0=\tfrac{1}{2\sqrt{\pi}}}_{\substack{\text{Proposition}\\\ref{prop:Y00constant}}}
+\;\Longrightarrow\;
+\underbrace{\tfrac{\partial Y_0^0}{\partial\theta}=\tfrac{\partial Y_0^0}{\partial\phi}=0}_{\substack{\text{Proposition}\\\ref{prop:nooscill}}}
+\;\Longrightarrow\;
+\underbrace{a_i\in(0,1)}_{\substack{\text{Proposition}\\\ref{prop:nonneg}}}
+\;\Longrightarrow\;
+\underbrace{I(u,v)\in(0,1]}_{\substack{\text{Definition}\\\ref{def:mip}}}
+\]
+
+\bigskip
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Property} & \textbf{Standard 3DGS} & \textbf{NeuroSGM ($L=0$)} \\
+\midrule
+Signal source           & External illumination   & Intrinsic emission \\
+Direction dependence    & Yes (BRDF)              & \textbf{No (isotropic)} \\
+SH degree required      & $L=1,2,3$               & \textbf{$L=0$ only} \\
+$Y_l^m$ oscillates      & Yes ($l\geq 1$)         & \textbf{No ($l=0$)} \\
+Negative SH values      & Present, managed        & \textbf{Non-existent} \\
+Parameters per Gaussian & $(L+1)^2 \cdot 3$       & \textbf{1 scalar} \\
+Physical correctness    & For reflectance         & \textbf{Exact for fluorescence} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+\noindent
+\textbf{Conclusion.}\quad
+The hypothesis is proved.  $L=0$ SH is not a simplification of a
+richer directional model; it is the \emph{mathematically exact and
+physically necessary} representation for isotropic fluorescence
+emission.  The concern about negative oscillations is vacuous at
+$L=0$ because $Y_0^0$ is a strictly positive constant with identically
+zero spatial frequency in all directions.  The current NeuroSGM scalar
+intensity model $a_i=\sigma(\mathrm{log\_intensity}_i)$ is the
+complete and correct SH representation for this physical system.
+\hfill$\blacksquare$
+
+\end{document}
